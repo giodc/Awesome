@@ -21,6 +21,7 @@ require_once AWESOME_DIR . '/inc/class-nav-walker.php';
 require_once AWESOME_DIR . '/inc/template-tags.php';
 require_once AWESOME_DIR . '/inc/post-meta.php';
 require_once AWESOME_DIR . '/inc/admin-post-list.php';
+require_once AWESOME_DIR . '/inc/yoast-rest-api.php';
 require_once AWESOME_DIR . '/inc/widgets.php';
 
 /**
