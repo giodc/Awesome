@@ -140,6 +140,38 @@ function awesome_single_post_meta(): void {
 }
 
 /**
+ * Render archive listing meta: date and categories.
+ */
+function awesome_archive_post_meta(): void {
+	$categories = get_the_category();
+
+	echo '<div class="archive-post__meta">';
+
+	echo '<time class="archive-post__meta-date" datetime="' . esc_attr( get_the_date( DATE_W3C ) ) . '">';
+	echo esc_html( get_the_date() );
+	echo '</time>';
+
+	if ( is_array( $categories ) && $categories !== array() ) {
+		$category_links = array();
+
+		foreach ( $categories as $category ) {
+			$category_links[] = sprintf(
+				'<a href="%1$s">%2$s</a>',
+				esc_url( get_category_link( $category->term_id ) ),
+				esc_html( $category->name )
+			);
+		}
+
+		echo '<span class="archive-post__meta-item archive-post__meta-categories">';
+		echo '<span class="archive-post__meta-label">' . esc_html__( 'In', 'awesome' ) . '</span> ';
+		echo wp_kses_post( implode( ', ', $category_links ) );
+		echo '</span>';
+	}
+
+	echo '</div>';
+}
+
+/**
  * Main content wrapper class.
  */
 function awesome_content_class(): string {

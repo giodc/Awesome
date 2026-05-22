@@ -49,9 +49,9 @@
 		"typography": {
 			"fontFamilies": [
 				{
-					"fontFamily": "\"Inter\", sans-serif",
-					"slug": "inter",
-					"name": "Inter"
+					"fontFamily": "\"Instrument Sans\", sans-serif",
+					"slug": "instrument-sans",
+					"name": "Instrument Sans"
 				}
 			]
 		}

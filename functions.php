@@ -61,7 +61,7 @@ add_action( 'after_setup_theme', 'awesome_setup' );
 function awesome_enqueue_assets(): void {
 	wp_enqueue_style(
 		'awesome-fonts',
-		'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+		'https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap',
 		array(),
 		null
 	);
@@ -148,13 +148,17 @@ function awesome_filter_theme_json( WP_Theme_JSON_Data $theme_json ): WP_Theme_J
 add_filter( 'wp_theme_json_data_theme', 'awesome_filter_theme_json' );
 
 /**
- * Remove "Category:" prefix from category archive titles.
+ * Remove taxonomy prefixes from category and tag archive titles.
  *
  * @param string $title Archive title.
  */
 function awesome_category_archive_title( string $title ): string {
 	if ( is_category() ) {
 		return single_cat_title( '', false );
+	}
+
+	if ( is_tag() ) {
+		return single_tag_title( '', false );
 	}
 
 	return $title;

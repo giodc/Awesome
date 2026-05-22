@@ -22,14 +22,14 @@ get_header();
 	</header>
 
 	<?php if ( have_posts() ) : ?>
-		<ul class="post-list wp-block-list">
-			<?php while ( have_posts() ) : ?>
-				<?php the_post(); ?>
-				<li>
-					<a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
-				</li>
-			<?php endwhile; ?>
-		</ul>
+		<div class="archive-post-list">
+			<?php
+			while ( have_posts() ) :
+				the_post();
+				get_template_part( 'template-parts/content', 'archive' );
+			endwhile;
+			?>
+		</div>
 		<?php the_posts_pagination(); ?>
 	<?php else : ?>
 		<div class="wp-content">
