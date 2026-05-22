@@ -1,0 +1,89 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/theme.json",
+	"version": 3,
+	"settings": {
+		"appearanceTools": true,
+		"layout": {
+			"contentSize": "800px",
+			"wideSize": "1200px"
+		},
+		"color": {
+			"palette": [
+				{
+					"slug": "primary",
+					"color": "#000000",
+					"name": "Primary"
+				},
+				{
+					"slug": "secondary",
+					"color": "#6a2929",
+					"name": "Secondary"
+				},
+				{
+					"slug": "accents",
+					"color": "#8d4b4b",
+					"name": "Accents"
+				},
+				{
+					"slug": "background",
+					"color": "#f2f0e5",
+					"name": "Background"
+				},
+				{
+					"slug": "text",
+					"color": "#000000",
+					"name": "Text"
+				},
+				{
+					"slug": "heading",
+					"color": "#000000",
+					"name": "Heading"
+				},
+				{
+					"slug": "footer",
+					"color": "#4a3030",
+					"name": "Footer"
+				}
+			]
+		},
+		"typography": {
+			"fontFamilies": [
+				{
+					"fontFamily": "\"Inter\", sans-serif",
+					"slug": "inter",
+					"name": "Inter"
+				}
+			]
+		}
+	},
+	"styles": {
+		"color": {
+			"background": "var(--color-background)",
+			"text": "var(--color-text)"
+		},
+		"typography": {
+			"fontFamily": "var(--font-family)",
+			"lineHeight": "1.6"
+		},
+		"elements": {
+			"heading": {
+				"color": {
+					"text": "var(--color-heading)"
+				},
+				"typography": {
+					"fontWeight": "600"
+				}
+			},
+			"link": {
+				"color": {
+					"text": "inherit"
+				},
+				":hover": {
+					"color": {
+						"text": "var(--color-secondary)"
+					}
+				}
+			}
+		}
+	}
+}
