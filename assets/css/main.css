@@ -537,6 +537,11 @@ figure.wp-block-image img {
 	margin-bottom: var(--spacing-lg);
 }
 
+.single-post__subtitle {
+	font-weight: 500;
+	margin: var(--spacing-sm) 0 0;
+}
+
 .single-post__meta {
 	align-items: baseline;
 	display: flex;

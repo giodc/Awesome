@@ -14,6 +14,7 @@ get_header();
 		<article id="post-<?php the_ID(); ?>" <?php post_class( 'single-post' ); ?>>
 			<header class="entry-header single-post__title-container">
 				<h1 class="entry-title"><?php the_title(); ?></h1>
+				<?php awesome_the_post_subtitle(); ?>
 				<?php awesome_single_post_meta(); ?>
 			</header>
 

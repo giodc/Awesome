@@ -19,6 +19,7 @@ require_once AWESOME_DIR . '/inc/defaults.php';
 require_once AWESOME_DIR . '/inc/customizer.php';
 require_once AWESOME_DIR . '/inc/class-nav-walker.php';
 require_once AWESOME_DIR . '/inc/template-tags.php';
+require_once AWESOME_DIR . '/inc/post-meta.php';
 require_once AWESOME_DIR . '/inc/widgets.php';
 
 /**
