@@ -131,7 +131,7 @@ img {
 
 .desktop-nav-list a.menu-item,
 .desktop-nav-list .dropdown-label {
-	padding: 20px 0;
+	padding: 6px 0;
 	transition: color 0.2s ease;
 }
 
