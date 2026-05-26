@@ -854,7 +854,26 @@ figure.wp-block-image img {
 }
 
 .footer-bottom > :not(p) {
-	margin-top: var(--spacing-lg);
+	margin-top: var(--spacing-md);
+}
+
+.copyrights-menu {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: var(--spacing-sm) var(--spacing-lg);
+}
+
+.copyrights-menu li {
+	margin: 0;
+}
+
+.copyrights-nav {
+	font-size: 0.9rem;
+	width: 100%;
 }
 
 a.nsc-bara-manage-cookie-settings {
@@ -909,6 +928,14 @@ a.nsc-bara-manage-cookie-settings {
 
 	.footer-columns.is-multi-column .footer-column {
 		text-align: left;
+	}
+
+	.copyrights-menu {
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		gap: var(--spacing-sm);
 	}
 }
 

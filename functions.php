@@ -53,7 +53,8 @@ function awesome_setup(): void {
 	add_theme_support( 'editor-styles' );
 
 	register_nav_menus( array(
-		'header' => __( 'Header Menu', 'awesome' ),
+		'header'     => __( 'Header Menu', 'awesome' ),
+		'copyrights' => __( 'Copyrights', 'awesome' ),
 	) );
 }
 add_action( 'after_setup_theme', 'awesome_setup' );
