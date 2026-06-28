@@ -27,6 +27,8 @@ get_header();
 			<div class="<?php echo esc_attr( awesome_content_class() ); ?>">
 				<?php the_content(); ?>
 			</div>
+
+			<?php awesome_the_post_share(); ?>
 		</article>
 	<?php endwhile; ?>
 </div>

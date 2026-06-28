@@ -23,6 +23,7 @@ require_once AWESOME_DIR . '/inc/post-meta.php';
 require_once AWESOME_DIR . '/inc/admin-post-list.php';
 require_once AWESOME_DIR . '/inc/yoast-rest-api.php';
 require_once AWESOME_DIR . '/inc/widgets.php';
+require_once AWESOME_DIR . '/inc/share.php';
 
 /**
  * Theme setup.
@@ -84,6 +85,25 @@ function awesome_enqueue_assets(): void {
 		AWESOME_VERSION,
 		true
 	);
+
+	if ( is_singular( 'post' ) ) {
+		wp_enqueue_script(
+			'awesome-share',
+			AWESOME_URI . '/assets/js/share.js',
+			array(),
+			AWESOME_VERSION,
+			true
+		);
+
+		wp_localize_script(
+			'awesome-share',
+			'awesomeShare',
+			array(
+				'copied'    => __( 'Link copied', 'awesome' ),
+				'copyError' => __( 'Could not copy link', 'awesome' ),
+			)
+		);
+	}
 }
 add_action( 'wp_enqueue_scripts', 'awesome_enqueue_assets' );
 
