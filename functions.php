@@ -16,6 +16,7 @@ define( 'AWESOME_DIR', get_template_directory() );
 define( 'AWESOME_URI', get_template_directory_uri() );
 
 require_once AWESOME_DIR . '/inc/defaults.php';
+require_once AWESOME_DIR . '/inc/fonts.php';
 require_once AWESOME_DIR . '/inc/customizer.php';
 require_once AWESOME_DIR . '/inc/class-nav-walker.php';
 require_once AWESOME_DIR . '/inc/template-tags.php';
@@ -24,6 +25,7 @@ require_once AWESOME_DIR . '/inc/admin-post-list.php';
 require_once AWESOME_DIR . '/inc/yoast-rest-api.php';
 require_once AWESOME_DIR . '/inc/widgets.php';
 require_once AWESOME_DIR . '/inc/share.php';
+require_once AWESOME_DIR . '/inc/global-sections.php';
 
 /**
  * Theme setup.
@@ -64,17 +66,15 @@ add_action( 'after_setup_theme', 'awesome_setup' );
  * Enqueue front-end assets.
  */
 function awesome_enqueue_assets(): void {
-	wp_enqueue_style(
-		'awesome-fonts',
-		'https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap',
-		array(),
-		null
-	);
+	// Depend on Google fonts when they were enqueued for the current selection.
+	if ( wp_style_is( 'awesome-fonts', 'enqueued' ) ) {
+		$font_deps[] = 'awesome-fonts';
+	}
 
 	wp_enqueue_style(
 		'awesome-main',
 		AWESOME_URI . '/assets/css/main.css',
-		array( 'awesome-fonts' ),
+		$font_deps,
 		AWESOME_VERSION
 	);
 
@@ -121,7 +121,7 @@ add_action( 'after_setup_theme', 'awesome_editor_styles' );
 function awesome_inline_theme_vars(): void {
 	$colors = awesome_get_theme_colors();
 	$css    = sprintf(
-		':root{--color-primary:%1$s;--color-secondary:%2$s;--color-accents:%3$s;--color-background:%4$s;--color-text:%5$s;--color-content-link:%6$s;--color-heading:%7$s;--color-heading-hover:%8$s;--color-text-hover:%9$s;--footer-background:%10$s;--footer-text:%11$s;--footer-text-hover:%12$s;}',
+		':root{--color-primary:%1$s;--color-secondary:%2$s;--color-accents:%3$s;--color-background:%4$s;--color-text:%5$s;--color-content-link:%6$s;--color-heading:%7$s;--color-heading-hover:%8$s;--color-text-hover:%9$s;--footer-background:%10$s;--footer-text:%11$s;--footer-text-hover:%12$s;--category-hero-bg:%13$s;--category-hero-text:%14$s;--container-width:%15$s;--header-menu-font-size:%16$s;--font-family:%17$s;--font-heading:%18$s;--font-header:%19$s;}',
 		esc_attr( $colors['primary'] ),
 		esc_attr( $colors['secondary'] ),
 		esc_attr( $colors['accents'] ),
@@ -133,7 +133,14 @@ function awesome_inline_theme_vars(): void {
 		esc_attr( $colors['text_hover'] ),
 		esc_attr( $colors['footer_bg'] ),
 		esc_attr( $colors['footer_text'] ),
-		esc_attr( $colors['footer_text_hover'] )
+		esc_attr( $colors['footer_text_hover'] ),
+		esc_attr( sanitize_hex_color( (string) get_theme_mod( 'awesome_category_hero_bg', '#1a1f26' ) ) ?: '#1a1f26' ),
+		esc_attr( sanitize_hex_color( (string) get_theme_mod( 'awesome_category_hero_text', '#ffffff' ) ) ?: '#ffffff' ),
+		esc_attr( awesome_get_content_max_width() . 'px' ),
+		esc_attr( awesome_get_header_menu_font_size() ),
+		awesome_get_font_stack( 'body' ),
+		awesome_get_font_stack( 'heading' ),
+		awesome_get_font_stack( 'header' )
 	);
 
 	wp_add_inline_style( 'awesome-main', $css );
@@ -144,7 +151,7 @@ add_action( 'wp_enqueue_scripts', 'awesome_inline_theme_vars', 20 );
  * Content width for embeds and media.
  */
 function awesome_content_width(): void {
-	$GLOBALS['content_width'] = 800;
+	$GLOBALS['content_width'] = awesome_get_content_max_width();
 }
 add_action( 'after_setup_theme', 'awesome_content_width', 0 );
 
@@ -155,6 +162,7 @@ add_action( 'after_setup_theme', 'awesome_content_width', 0 );
  */
 function awesome_filter_theme_json( WP_Theme_JSON_Data $theme_json ): WP_Theme_JSON_Data {
 	$colors = awesome_get_theme_colors();
+	$width  = awesome_get_content_max_width() . 'px';
 	$data   = $theme_json->get_data();
 
 	$data['settings']['color']['palette'] = array(
@@ -166,6 +174,9 @@ function awesome_filter_theme_json( WP_Theme_JSON_Data $theme_json ): WP_Theme_J
 		array( 'slug' => 'heading', 'color' => $colors['heading'], 'name' => 'Heading' ),
 		array( 'slug' => 'footer', 'color' => $colors['footer_bg'], 'name' => 'Footer' ),
 	);
+
+	$data['settings']['layout']['contentSize'] = $width;
+	$data['settings']['layout']['wideSize']    = max( awesome_get_content_max_width() + 200, 1200 ) . 'px';
 
 	return $theme_json->update_with( $data );
 }

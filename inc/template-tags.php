@@ -172,6 +172,49 @@ function awesome_archive_post_meta(): void {
 }
 
 /**
+ * Whether the category archive hero is enabled globally.
+ */
+function awesome_category_hero_enabled(): bool {
+	return (bool) get_theme_mod( 'awesome_category_hero_enabled', false );
+}
+
+/**
+ * Whether the current view should show the category hero.
+ */
+function awesome_show_category_hero(): bool {
+	return is_category() && awesome_category_hero_enabled();
+}
+
+/**
+ * Render the category archive hero.
+ */
+function awesome_the_category_hero(): void {
+	if ( ! awesome_show_category_hero() ) {
+		return;
+	}
+
+	$term = get_queried_object();
+
+	if ( ! $term instanceof WP_Term ) {
+		return;
+	}
+
+	$description = term_description( $term->term_id, 'category' );
+
+	echo '<header class="category-hero">';
+	echo '<div class="category-hero__inner">';
+	echo '<p class="category-hero__label">' . esc_html__( 'Category', 'awesome' ) . '</p>';
+	echo '<h1 class="category-hero__title">' . esc_html( $term->name ) . '</h1>';
+
+	if ( is_string( $description ) && $description !== '' ) {
+		echo '<div class="category-hero__description">' . wp_kses_post( $description ) . '</div>';
+	}
+
+	echo '</div>';
+	echo '</header>';
+}
+
+/**
  * Main content wrapper class.
  */
 function awesome_content_class(): string {

@@ -12,12 +12,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Footer sidebar IDs (up to 4 columns).
+ * Footer sidebar IDs (up to 5 columns).
  *
  * @return string[]
  */
 function awesome_footer_sidebar_ids(): array {
-	return array( 'footer-1', 'footer-2', 'footer-3', 'footer-4' );
+	return array( 'footer-1', 'footer-2', 'footer-3', 'footer-4', 'footer-5' );
 }
 
 /**
@@ -40,8 +40,39 @@ function awesome_register_widget_areas(): void {
 			)
 		);
 	}
+
+	register_sidebar(
+		array(
+			'name'          => __( 'Single Post Sidebar', 'awesome' ),
+			'id'            => 'sidebar-single',
+			'description'   => __( 'Sticky sidebar shown on single posts when enabled.', 'awesome' ),
+			'before_widget' => '<div id="%1$s" class="widget %2$s">',
+			'after_widget'  => '</div>',
+			'before_title'  => '<h3 class="widget-title">',
+			'after_title'   => '</h3>',
+		)
+	);
 }
 add_action( 'widgets_init', 'awesome_register_widget_areas' );
+
+/**
+ * Whether the single post sidebar should render.
+ */
+function awesome_show_single_sidebar(): bool {
+	if ( ! is_singular( 'post' ) || ! is_active_sidebar( 'sidebar-single' ) ) {
+		return false;
+	}
+
+	$post_id = (int) get_the_ID();
+	if ( $post_id > 0 ) {
+		$override = get_post_meta( $post_id, 'awesome_sticky_sidebar', true );
+		if ( '0' === $override || '1' === $override ) {
+			return '1' === $override;
+		}
+	}
+
+	return (bool) get_theme_mod( 'awesome_single_sticky_sidebar', false );
+}
 
 /**
  * Footer sidebars that currently have widgets.

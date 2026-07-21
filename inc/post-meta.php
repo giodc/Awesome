@@ -80,6 +80,36 @@ function awesome_register_post_meta(): void {
 			},
 		)
 	);
+
+	register_post_meta(
+		'post',
+		'awesome_post_hero',
+		array(
+			'type'              => 'boolean',
+			'single'            => true,
+			'default'           => false,
+			'show_in_rest'      => true,
+			'sanitize_callback' => 'rest_sanitize_boolean',
+			'auth_callback'     => static function (): bool {
+				return current_user_can( 'edit_posts' );
+			},
+		)
+	);
+
+	register_post_meta(
+		'post',
+		'awesome_sticky_sidebar',
+		array(
+			'type'              => 'string',
+			'single'            => true,
+			'default'           => '',
+			'show_in_rest'      => true,
+			'sanitize_callback' => 'sanitize_text_field',
+			'auth_callback'     => static function (): bool {
+				return current_user_can( 'edit_posts' );
+			},
+		)
+	);
 }
 add_action( 'init', 'awesome_register_post_meta' );
 
@@ -112,6 +142,107 @@ function awesome_add_status_meta_box(): void {
 	);
 }
 add_action( 'add_meta_boxes', 'awesome_add_status_meta_box' );
+
+/**
+ * Add post layout options meta box.
+ */
+function awesome_add_layout_meta_box(): void {
+	add_meta_box(
+		'awesome-layout',
+		__( 'Post Layout', 'awesome' ),
+		'awesome_render_layout_meta_box',
+		'post',
+		'side',
+		'default'
+	);
+}
+add_action( 'add_meta_boxes', 'awesome_add_layout_meta_box' );
+
+/**
+ * Render post layout meta box.
+ *
+ * @param WP_Post $post Current post.
+ */
+function awesome_render_layout_meta_box( WP_Post $post ): void {
+	wp_nonce_field( 'awesome_save_layout', 'awesome_layout_nonce' );
+
+	$hero     = (bool) get_post_meta( $post->ID, 'awesome_post_hero', true );
+	$sidebar  = get_post_meta( $post->ID, 'awesome_sticky_sidebar', true );
+	$sidebar  = is_string( $sidebar ) ? $sidebar : '';
+
+	echo '<p>';
+	echo '<label>';
+	echo '<input type="checkbox" name="awesome_post_hero" value="1" ' . checked( $hero, true, false ) . '> ';
+	echo esc_html__( 'Hero header (uses featured image)', 'awesome' );
+	echo '</label>';
+	echo '</p>';
+	echo '<p class="description">' . esc_html__( 'Shows category, title, and subtitle over the featured image with an overlay.', 'awesome' ) . '</p>';
+
+	echo '<p>';
+	echo '<label for="awesome-sticky-sidebar-field">' . esc_html__( 'Sticky sidebar', 'awesome' ) . '</label>';
+	echo '<select id="awesome-sticky-sidebar-field" name="awesome_sticky_sidebar" class="widefat">';
+	printf( '<option value="" %s>%s</option>', selected( $sidebar, '', false ), esc_html__( 'Use theme default', 'awesome' ) );
+	printf( '<option value="1" %s>%s</option>', selected( $sidebar, '1', false ), esc_html__( 'Enabled', 'awesome' ) );
+	printf( '<option value="0" %s>%s</option>', selected( $sidebar, '0', false ), esc_html__( 'Disabled', 'awesome' ) );
+	echo '</select>';
+	echo '</p>';
+}
+
+/**
+ * Save post layout meta box values.
+ *
+ * @param int $post_id Post ID.
+ */
+function awesome_save_layout_meta_box( int $post_id ): void {
+	if ( ! isset( $_POST['awesome_layout_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['awesome_layout_nonce'] ) ), 'awesome_save_layout' ) ) {
+		return;
+	}
+
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		return;
+	}
+
+	if ( ! current_user_can( 'edit_post', $post_id ) ) {
+		return;
+	}
+
+	$hero = isset( $_POST['awesome_post_hero'] ) ? '1' : '';
+	if ( $hero === '' ) {
+		delete_post_meta( $post_id, 'awesome_post_hero' );
+	} else {
+		update_post_meta( $post_id, 'awesome_post_hero', true );
+	}
+
+	$sidebar = isset( $_POST['awesome_sticky_sidebar'] )
+		? sanitize_text_field( wp_unslash( $_POST['awesome_sticky_sidebar'] ) )
+		: '';
+
+	if ( ! in_array( $sidebar, array( '', '0', '1' ), true ) ) {
+		$sidebar = '';
+	}
+
+	if ( $sidebar === '' ) {
+		delete_post_meta( $post_id, 'awesome_sticky_sidebar' );
+	} else {
+		update_post_meta( $post_id, 'awesome_sticky_sidebar', $sidebar );
+	}
+}
+add_action( 'save_post', 'awesome_save_layout_meta_box' );
+
+/**
+ * Whether the current post should use the hero layout.
+ *
+ * @param int $post_id Post ID.
+ */
+function awesome_post_has_hero( int $post_id = 0 ): bool {
+	$post_id = $post_id > 0 ? $post_id : (int) get_the_ID();
+
+	if ( $post_id <= 0 || ! has_post_thumbnail( $post_id ) ) {
+		return false;
+	}
+
+	return (bool) get_post_meta( $post_id, 'awesome_post_hero', true );
+}
 
 /**
  * Render status meta box.
@@ -276,15 +407,110 @@ function awesome_get_post_subtitle(): string {
 
 /**
  * Output post subtitle as h2 when set.
+ *
+ * @param string $class Extra CSS class.
  */
-function awesome_the_post_subtitle(): void {
+function awesome_the_post_subtitle( string $class = 'single-post__subtitle entry-subtitle' ): void {
 	$subtitle = awesome_get_post_subtitle();
 
 	if ( $subtitle === '' ) {
 		return;
 	}
 
-	echo '<h2 class="single-post__subtitle entry-subtitle">';
+	echo '<h2 class="' . esc_attr( $class ) . '">';
 	echo esc_html( $subtitle );
 	echo '</h2>';
 }
+
+/**
+ * Whether transparent overlay header is active (homepage setting or post hero).
+ */
+function awesome_has_transparent_header(): bool {
+	if ( is_front_page() && (bool) get_theme_mod( 'awesome_homepage_transparent_header', false ) ) {
+		return true;
+	}
+
+	if ( is_singular( 'post' ) && awesome_post_has_hero() ) {
+		return true;
+	}
+
+	return false;
+}
+
+/**
+ * Primary category for a post (first assigned).
+ *
+ * @param int $post_id Post ID.
+ */
+function awesome_get_primary_category( int $post_id = 0 ): ?WP_Term {
+	$post_id    = $post_id > 0 ? $post_id : (int) get_the_ID();
+	$categories = get_the_category( $post_id );
+
+	if ( ! is_array( $categories ) || $categories === array() ) {
+		return null;
+	}
+
+	return $categories[0];
+}
+
+/**
+ * Render single post hero (featured image background).
+ */
+function awesome_the_post_hero(): void {
+	$post_id = (int) get_the_ID();
+
+	if ( ! awesome_post_has_hero( $post_id ) ) {
+		return;
+	}
+
+	$image_url = get_the_post_thumbnail_url( $post_id, 'full' );
+	$category  = awesome_get_primary_category( $post_id );
+
+	if ( ! is_string( $image_url ) || $image_url === '' ) {
+		return;
+	}
+
+	echo '<header class="single-post__hero" style="background-image:url(' . esc_url( $image_url ) . ')">';
+	echo '<div class="single-post__hero-overlay" aria-hidden="true"></div>';
+	echo '<div class="single-post__hero-inner container">';
+
+	if ( $category instanceof WP_Term ) {
+		echo '<p class="single-post__hero-category">';
+		echo '<a href="' . esc_url( get_category_link( $category->term_id ) ) . '">';
+		echo esc_html( $category->name );
+		echo '</a>';
+		echo '</p>';
+	}
+
+	echo '<h1 class="single-post__hero-title entry-title">' . esc_html( get_the_title() ) . '</h1>';
+	awesome_the_post_subtitle( 'single-post__hero-subtitle entry-subtitle' );
+	echo '</div>';
+	echo '</header>';
+}
+
+/**
+ * Body classes for layout modes.
+ *
+ * @param string[] $classes Existing classes.
+ * @return string[]
+ */
+function awesome_body_classes( array $classes ): array {
+	if ( awesome_has_transparent_header() ) {
+		$classes[] = 'has-transparent-header';
+	}
+
+	if ( is_singular( 'post' ) && awesome_post_has_hero() ) {
+		$classes[] = 'has-post-hero';
+	}
+
+	if ( is_singular( 'post' ) && awesome_show_single_sidebar() ) {
+		$classes[] = 'has-post-sidebar';
+	}
+
+	if ( awesome_show_category_hero() ) {
+		$classes[] = 'has-category-hero';
+	}
+
+	return $classes;
+}
+add_filter( 'body_class', 'awesome_body_classes' );

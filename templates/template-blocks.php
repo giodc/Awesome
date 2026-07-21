@@ -11,7 +11,7 @@
 get_header();
 ?>
 
-<div class="container container--blocks">
+<div class="container container--blocks entry-content-wrapper">
 	<?php while ( have_posts() ) : ?>
 		<?php the_post(); ?>
 		<article id="post-<?php the_ID(); ?>" <?php post_class( 'blocks-content' ); ?>>

@@ -8,7 +8,9 @@
 ?>
 </main>
 
-<footer class="site-footer" role="contentinfo">
+<?php awesome_render_global_section( 'before_footer' ); ?>
+
+<footer class="site-footer<?php echo awesome_has_global_section( 'before_footer' ) ? ' site-footer--after-global-section' : ''; ?>" role="contentinfo">
 	<?php if ( awesome_has_footer_widgets() ) : ?>
 		<div class="footer-container">
 			<?php awesome_render_footer_widgets(); ?>
@@ -34,7 +36,6 @@
 			</nav>
 		<?php endif; ?>
 
-		<?php echo do_shortcode( '[cc_show_cookie_banner_nsc_bar]' ); ?>
 	</div>
 </footer>
 
